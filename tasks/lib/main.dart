@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'stateless.dart';
-import 'home.dart';
+import 'pages/list_page.dart';
+import 'pages/home.dart';
 
 void main() {
   runApp(const MyApp());
@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
       initialRoute: '/home',
       routes: {
         '/home': (context) => const MyHomePage(title: 'Flutter Demo Home Page'),
-        '/stateless': (context) => const StatelessPage(),
+        '/list': (context) => const ListPage(),
       },
       title: 'Flutter Demo',
       theme: ThemeData(
@@ -43,7 +43,7 @@ class _MyHomePageState extends State<MyHomePage> {
   // ボトムメニューの遷移先画面, 上から0,1,...
   final _pages = [
     const Home(title: 'Flutter Demo Home Page'),
-    const StatelessPage(),
+    const ListPage(),
   ];
 
   @override
