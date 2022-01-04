@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:sqflite/sqflite.dart' as sqflite;
+import 'package:path/path.dart' as path;
+import 'package:tasks/db/task.dart';
+import 'dart:io';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart' as sqflite_ffi;
 
 class Tasks extends StatefulWidget {
   const Tasks({Key? key}) : super(key: key);
@@ -7,13 +12,72 @@ class Tasks extends StatefulWidget {
   State<Tasks> createState() => _TasksState();
 }
 
+// task の中身
 class _TasksState extends State<Tasks> {
   final List<int> _items = List<int>.generate(50, (int index) => index);
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    /*final Color oddItemColor = colorScheme.primary.withOpacity(0.05);
+    // Create an absolute path to databse
+    const String databaseName = 'tasks.db';
+    String databasePath;
+    // SQL command literal
+    const String initSQL =
+        'CREATE TABLE tasks (id INTEGER PRIMARY KEY, text TEXT, priority INTEGER)';
+
+    if (Platform.isWindows || Platform.isLinux) {
+      databasePath = path.join(Directory.current.path, 'data');
+      debugPrint(databasePath);
+      // Directory(databasePath).create();
+
+      // Initialize FFI
+      sqflite_ffi.sqfliteFfiInit();
+      // Change the default factory
+      sqflite.databaseFactory = sqflite_ffi.databaseFactoryFfi;
+    } else {
+      databasePath = sqflite.getDatabasesPath() as String;
+    }
+
+    final String pathToDb = path.join(databasePath, databaseName);
+
+    // Open or connect database
+    final Future<sqflite.Database> database = sqflite.openDatabase(pathToDb,
+        onCreate: (sqflite.Database db, int version) async {
+      await db.execute(initSQL);
+    });
+
+    Future<void> insertTask(Task memo) async {
+      final sqflite.Database db = await database;
+      await db.insert(
+        'tasks',
+        memo.toMap(),
+        conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
+      );
+    }
+
+    Future<List<Task>> getTasks() async {
+      final sqflite.Database db = await database;
+      final List<Map<String, dynamic>> maps = await db.query('memo');
+      return List.generate(maps.length, (i) {
+        return Task(
+          id: maps[i]['id'],
+          text: maps[i]['text'],
+          priority: maps[i]['priority'],
+        );
+      });
+    }
+
+    final todo = Task(
+      id: 0,
+      text: 'Flutterで遊ぶ',
+      priority: 1,
+    );
+
+    insertTask(todo);
+    List<Task> tasks = getTasks() as List<Task>;
+
+    /*final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final Color oddItemColor = colorScheme.primary.withOpacity(0.05);
     final Color evenItemColor = colorScheme.primary.withOpacity(0.15);*/
 
     return ReorderableListView(
@@ -58,7 +122,6 @@ class _TasksState extends State<Tasks> {
   }
 }
 
-// task の中身の指定
 class _BoxContents extends StatefulWidget {
   const _BoxContents({
     Key? key,
@@ -79,6 +142,7 @@ class _BoxContents extends StatefulWidget {
   State<_BoxContents> createState() => _BoxContentsState();
 }
 
+// task の中身の形式
 class _BoxContentsState extends State<_BoxContents> {
   @override
   Widget build(BuildContext context) {
