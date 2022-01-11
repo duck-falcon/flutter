@@ -17,8 +17,6 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
       drawer: Drawer(
@@ -34,8 +32,6 @@ class _HomeState extends State<Home> {
           },
           secondary: const Icon(Icons.favorite, color: Colors.teal),
         ),
-        /* SwitichListTileが続く */
-        /* Dividerなど他のものが含まれてもOK */
       ])),
       body: const HomeBody(),
     );

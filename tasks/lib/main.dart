@@ -1,9 +1,19 @@
 import 'package:flutter/material.dart';
 import 'pages/list_page.dart';
 import 'pages/home.dart';
+import 'package:provider/provider.dart';
+import 'models/task.dart';
+import 'pages/task_create.dart';
 
 void main() {
-  runApp(const MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  final taskNotifier = TasksNotifier();
+  runApp(MultiProvider(
+    providers: [
+      ChangeNotifierProvider<TasksNotifier>(create: (context) => taskNotifier),
+    ],
+    child: const MyApp(),
+  ));
 }
 
 class MyApp extends StatelessWidget {
@@ -17,6 +27,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/home': (context) => const MyHomePage(title: 'Flutter Demo Home Page'),
         '/list': (context) => const ListPage(),
+        '/task_create': (context) => const TaskCreate(),
       },
       title: 'Flutter Demo',
       theme: ThemeData(
